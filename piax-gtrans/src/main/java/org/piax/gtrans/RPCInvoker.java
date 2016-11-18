@@ -13,14 +13,21 @@
 
 package org.piax.gtrans;
 
-import static java.util.Comparator.comparing;
+// valid on Java 8 API
+//import static java.util.Comparator.comparing;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.nio.channels.ClosedChannelException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -263,11 +270,20 @@ public class RPCInvoker<T extends RPCIf, E extends Endpoint> implements RPCIf {
         peer.unregisterRPCObject(objId, this);
         if (POOL_CHANNEL) {
             logger.debug("pool size ={}", channelPool.size());
+            for (RPCInvoker<T, E>.ChannelPoolEntry cpe : channelPool.values()) {
+            	if (!cpe.channel.isClosed()) {
+            		cpe.channel.close();
+            	}
+            	
+            }
+            // valid on Java 8 API
+            /*
             channelPool.values().stream().forEach(cpe -> {
             		if (!cpe.channel.isClosed()) {
             			cpe.channel.close();
             		}
             });
+            */
             channelPool.clear();
         }
     }
@@ -742,6 +758,37 @@ public class RPCInvoker<T extends RPCIf, E extends Endpoint> implements RPCIf {
     }
     
     private void expireIfNeeded() {
+    	List<Map.Entry<E, ChannelPoolEntry>> list = new LinkedList<>(channelPool.entrySet());
+    	Collections.sort(list, new Comparator<Map.Entry<E, ChannelPoolEntry>>()
+    	{
+			@Override
+			public int compare(Entry<E, RPCInvoker<T, E>.ChannelPoolEntry> o1,
+					Entry<E, RPCInvoker<T, E>.ChannelPoolEntry> o2) {
+				return ((Long)(o1.getValue().getTimestamp())).compareTo((Long)o2.getValue().getTimestamp());
+			}
+    	});
+    	
+    	Map<E, ChannelPoolEntry>result = new LinkedHashMap<E, ChannelPoolEntry>();
+    	for (Map.Entry<E, ChannelPoolEntry>e : list) {
+    		result.put(e.getKey(), e.getValue());
+    	}
+
+    	int i = 0;
+    	int max = channelPool.size() - POOL_CHANNEL_SIZE;
+    	for (ChannelPoolEntry cpe: result.values()) {
+    		if (i < max) {
+    			synchronized(cpe) {
+    				if (!cpe.isInUse()) {
+    					cpe.channel.close();
+    				}
+    			}
+    			channelPool.remove(cpe.getRemote());
+    			i++;
+    		}
+    	}
+
+    	// valid on Java 8 API
+    	/*
         if (channelPool.size() > POOL_CHANNEL_SIZE) {
             // remove oldest entries more than threshold from the pool.
             channelPool.values().stream()
@@ -757,6 +804,7 @@ public class RPCInvoker<T extends RPCIf, E extends Endpoint> implements RPCIf {
                 channelPool.remove(cpe.getRemote());
             });
         }
+        */
     }
 
     /**

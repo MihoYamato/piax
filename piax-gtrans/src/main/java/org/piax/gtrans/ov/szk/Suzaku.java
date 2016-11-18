@@ -23,6 +23,7 @@ import java.util.Set;
 import org.piax.common.ComparableKey;
 import org.piax.common.Destination;
 import org.piax.common.Endpoint;
+import org.piax.common.Key;
 import org.piax.common.ObjectId;
 import org.piax.common.TransportId;
 import org.piax.common.subspace.KeyRange;
@@ -449,5 +450,11 @@ public class Suzaku<D extends Destination, K extends ComparableKey<?>>
     @Override
     public int getHeight(Comparable<?> key) {
         return chordSharp.getHeight(key);
+    }
+
+	// from valid on Java 8 API default method
+	@Override
+	public Set<Key> keySet() throws ProtocolUnsupportedException {
+		throw new ProtocolUnsupportedException();
     }
 }

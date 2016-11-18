@@ -1304,7 +1304,7 @@ public class TestOverlay {
 
     @Test
     public void SuzakuRoutingTableTest() throws Exception {
-        int numOfPeers = 50;
+        final int numOfPeers = 50;
         // get peers
         PeerLocator loc = null;
         Suzaku<Destination, ComparableKey<?>> trs[] = new Suzaku[numOfPeers];
@@ -1318,7 +1318,7 @@ public class TestOverlay {
             trs[i] = new Suzaku<Destination, ComparableKey<?>>((peers[i] = Peer
                     .getInstance(new PeerId("p" + i)))
                     .newBaseChannelTransport(l));
-            int x = i;
+            final int x = i;
             trs[i].setListener(new OverlayListener<Destination, ComparableKey<?>>() {
                 public void onReceive(
                         Overlay<Destination, ComparableKey<?>> overlay,
@@ -1340,6 +1340,11 @@ public class TestOverlay {
                     }
                     return overlay.singletonFutureQueue("recv" + x);
                 }
+
+				@Override
+				public void onReceive(Transport<Destination> trans, ReceivedMessage rmsg) {
+					
+				}
             });
         }
         try {
@@ -1380,7 +1385,7 @@ public class TestOverlay {
     
     @Test
     public void MSGRoutingTableTest() throws Exception {
-        int numOfPeers = 50;
+        final int numOfPeers = 50;
         // get peers
         PeerLocator loc = null;
         MSkipGraph<Destination, ComparableKey<?>> trs[] = new MSkipGraph[numOfPeers];
@@ -1394,7 +1399,7 @@ public class TestOverlay {
             trs[i] = new MSkipGraph<Destination, ComparableKey<?>>((peers[i] = Peer
                     .getInstance(new PeerId("p" + i)))
                     .newBaseChannelTransport(l));
-            int x = i;
+            final int x = i;
             trs[i].setListener(new OverlayListener<Destination, ComparableKey<?>>() {
                 public void onReceive(
                         Overlay<Destination, ComparableKey<?>> overlay,
@@ -1416,6 +1421,11 @@ public class TestOverlay {
                     }
                     return overlay.singletonFutureQueue("recv" + x);
                 }
+
+				@Override
+				public void onReceive(Transport<Destination> trans, ReceivedMessage rmsg) {
+					
+				}
             });
         }
         try {

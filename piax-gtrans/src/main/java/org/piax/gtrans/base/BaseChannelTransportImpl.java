@@ -258,11 +258,22 @@ public class BaseChannelTransportImpl<E extends PeerLocator> extends
             }
             final OneToOneChannel<E> fch = ch; 
             if (fch != null) {
-                final NestedMessage fnmsg = nmsg; 
+                final NestedMessage fnmsg = nmsg;
+                peer.execute(new Runnable() {
+					@Override
+					public void run() {
+					    peer.concatPeerId2ThreadName();
+					    _onReceive(fch, fnmsg);
+					}
+				})
+				;
+                // valid on Java 8 API
+                /*
                 peer.execute(() -> {
                     peer.concatPeerId2ThreadName();
                     _onReceive(fch, fnmsg);
                 });
+                */
             }
         }
         else {
@@ -277,18 +288,31 @@ public class BaseChannelTransportImpl<E extends PeerLocator> extends
                     return;
                 }
                 List<NestedMessage> nmsgs = defragReceiveMsg(lowerCh, bbuf);
-                for (NestedMessage nmsg : nmsgs) {
+                for (final NestedMessage nmsg : nmsgs) {
+				// valid on Java 8 API
+                //for (NestedMessage nmsg : nmsgs) {
                     if (nmsg.srcPeerId == null) {
                         // transportからのsendの場合
                         // srcPeerIdに値がセットされないことを使って、判定している。あまりかっこよくない
                         // 受信側でcloseする
                         // このようにしないとBindExceptionが出るようになる
                         // なるべく早くチャネルを開放するため、_onReceiveより先にcloseする
+                        peer.execute(new Runnable() {
+							@Override
+							public void run() {
+							    peer.concatPeerId2ThreadName();
+							    lowerCh.close();
+							    _onReceive(getLowerTransport(), nmsg);
+							}
+						});
+                        // valid on Java 8 API
+                        /*
                         peer.execute(() -> {
                             peer.concatPeerId2ThreadName();
                             lowerCh.close();
                             _onReceive(getLowerTransport(), nmsg);
                         });
+                        */
                     } 
                     else {
                         OneToOneChannel<E> ch = _putReceiveQueue(lowerCh, nmsg);
@@ -297,11 +321,22 @@ public class BaseChannelTransportImpl<E extends PeerLocator> extends
                         }
                     }
                 }
-                for (ReceiveChannelAndMessage dnmsg : dnmsgs) {
+                for (final ReceiveChannelAndMessage dnmsg : dnmsgs) {
+                //for (ReceiveChannelAndMessage dnmsg : dnmsgs) {                	
+                    peer.execute(new Runnable() {
+						@Override
+						public void run() {
+						    peer.concatPeerId2ThreadName();
+						    _onReceive(dnmsg.ch, dnmsg.nmsg);
+						}
+					});
+                    // valid on Java 8 API
+                    /*
                     peer.execute(() -> {
                         peer.concatPeerId2ThreadName();
                         _onReceive(dnmsg.ch, dnmsg.nmsg);
                     });
+                    */
                 }
             }
         }

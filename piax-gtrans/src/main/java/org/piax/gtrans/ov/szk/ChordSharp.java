@@ -38,6 +38,7 @@ import org.piax.gtrans.ov.ddll.Link;
 import org.piax.gtrans.ov.ddll.Node;
 import org.piax.gtrans.ov.ring.MyThreadPool;
 import org.piax.gtrans.ov.ring.NoSuchKeyException;
+import org.piax.gtrans.ov.ring.RingVNode;
 import org.piax.gtrans.ov.ring.rq.DKRangeRValue;
 import org.piax.gtrans.ov.ring.rq.MessagePath;
 import org.piax.gtrans.ov.ring.rq.QueryId;
@@ -141,13 +142,40 @@ public class ChordSharp<E extends Endpoint> extends RQManager<E> implements
             }
             ret.add(e.link);
             if (e.successors != null) {
+            	for (Link link : e.successors) { 
+            		ret.add(link);
+            	}
+            	// valid on Java 8 API
+            	/*
                 Arrays.stream(e.successors).forEach((link) -> {
                     ret.add(link);
                 });
+                */
             }
             return ret.toArray(new Link[0]);
         }
         else {
+        	for (RingVNode<E> n : keyHash.values()) {
+        		ChordSharpVNode<E> vnode = (ChordSharpVNode<E>) n;
+        		for (FTEntry e : vnode.forwardTable.table.getAll()) {
+        			ret.add(e.link);
+        			if (e.successors != null) {
+        				for (Link link : e.successors) {
+        					ret.add(link);
+        				}
+        			}
+        		}
+        		for (FTEntry e : vnode.backwardTable.table.getAll()) {
+        			ret.add(e.link);
+                    if (e.successors != null) {
+                    	for (Link link : e.successors) {
+                    		ret.add(link);
+                    	}
+                    }
+        		}
+        	}
+        	// valid for Java 8 API
+        	/*
             keyHash.values().forEach((n) -> {
                 ChordSharpVNode<E> vnode = (ChordSharpVNode<E>) n;
                 vnode.forwardTable.table.getAll().forEach((e) -> {
@@ -167,6 +195,7 @@ public class ChordSharp<E extends Endpoint> extends RQManager<E> implements
                     }
                 });
             });
+            */
             return ret.toArray(new Link[0]);
         }
     }

@@ -1921,10 +1921,17 @@ public class SkipGraph<E extends Endpoint> extends RPCInvoker<SkipGraphIf<E>, E>
     Link[] getNeighbors(Comparable<?> key, boolean right, int level) {
         ArrayList<Link> ret = new ArrayList<Link>();
         if (key == null) {
+        	for (SGNode<E> snode: keyHash.values()) {
+        		SGNode<E> s = snode;
+        		ret.addAll(s.getAllLinks(true));
+        	}
+        	// valid on Java 8 API
+        	/*
             keyHash.values().forEach((snode)->{
                 SGNode s = snode;
                 ret.addAll(s.getAllLinks(true));
             });
+            */
         }
         else {
             SGNode s = keyHash.get(key);

@@ -27,13 +27,19 @@ import org.piax.gtrans.TransportListener;
  */
 public interface OverlayListener<D extends Destination, K extends Destination> 
 	extends TransportListener<D> {
+    void onReceive(Overlay<D, K> ov, OverlayReceivedMessage<K> rmsg);
+	// valid on Java 8 API
+    /*
     default void onReceive(Overlay<D, K> ov, OverlayReceivedMessage<K> rmsg) {
     }
-    
+    */
     FutureQueue<?> onReceiveRequest(Overlay<D, K> ov,
             OverlayReceivedMessage<K> rmsg);
 
+    public void onReceive(Transport<D> trans, ReceivedMessage rmsg);
     // valid on Java 8 API
+    /*
     default public void onReceive(Transport<D> trans, ReceivedMessage rmsg) {
     }
+    */
 }

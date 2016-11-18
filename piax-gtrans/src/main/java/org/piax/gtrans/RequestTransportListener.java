@@ -34,6 +34,8 @@ public interface RequestTransportListener<D extends Destination> extends
             ReceivedMessage rmsg);
     
     // valid on Java 8 API
+    /*
     default public void onReceive(Transport<D> trans, ReceivedMessage rmsg) {
     }
+    */
 }

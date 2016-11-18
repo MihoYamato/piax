@@ -7,7 +7,25 @@ import org.piax.gtrans.ProtocolUnsupportedException;
 import org.piax.gtrans.ov.ddll.Link;
 
 public interface RoutingTableAccessor {
+    public Link[] getAll() throws ProtocolUnsupportedException;
+    
+    public Set<Key> keySet() throws ProtocolUnsupportedException;
+    
+    public Link getLocal(Comparable<?> key) throws ProtocolUnsupportedException;
+    public Link getRight(Comparable<?> key) throws ProtocolUnsupportedException; // a.k.a. successor
+    public Link getLeft(Comparable<?> key) throws ProtocolUnsupportedException; // a.k.a. predecessor
+    public Link getRight(Comparable<?> key, int level) throws ProtocolUnsupportedException;
+    public Link getLeft(Comparable<?> key, int level) throws ProtocolUnsupportedException;
+    
+    public int getHeight(Comparable<?> key) throws ProtocolUnsupportedException;
+    // Getting redundant links
+    public Link[] getRights(Comparable<?> key) throws ProtocolUnsupportedException;
+    public Link[] getLefts(Comparable<?> key) throws ProtocolUnsupportedException;
+    public Link[] getRights(Comparable<?> key, int level) throws ProtocolUnsupportedException;
+    public Link[] getLefts(Comparable<?> key, int level) throws ProtocolUnsupportedException;
 
+    // valid on Java 8 API
+	/*
     default public Link[] getAll() throws ProtocolUnsupportedException {
         throw new ProtocolUnsupportedException();
     };
@@ -48,4 +66,5 @@ public interface RoutingTableAccessor {
     default public Link[] getLefts(Comparable<?> key, int level) throws ProtocolUnsupportedException {
         throw new ProtocolUnsupportedException();
     };
+    */
 }

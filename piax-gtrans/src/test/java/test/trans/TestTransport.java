@@ -849,7 +849,7 @@ public class TestTransport {
         sg_received1 = false;
         sg_received2 = false;
         
-        ObjectId oid = new ObjectId("app");
+        final ObjectId oid = new ObjectId("app");
         ObjectId oid2 = new ObjectId("app2");
 
         tr1.setListener(oid, new TransportListener<ComparableKey<?>>() {
